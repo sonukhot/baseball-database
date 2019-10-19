@@ -1,88 +1,123 @@
 CREATE DATABASE baseball;
 
 USE baseball;
-DROP TABLE team;
-CREATE TABLE team (
-    team_abbreviation VARCHAR (3),
-    name VARCHAR(255),
-    mascot VARCHAR (255),
-    location VARCHAR (255),
-    league VARCHAR(3),
-    division VARCHAR (2),
-    createdAT DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updatedAT DATETIME DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+
+CREATE TABLE teams
+(
+    id INT
+    AUTO_INCREMENT,
+    location VARCHAR
+    (255),
+    mascot VARCHAR
+    (255),
+    abbreviation VARCHAR
+    (3),
+    league ENUM
+    ('AL','NL') NOT NULL,
+    division ENUM
+    ('East', 'Central', 'West') NOT NULL,
+    createdAT DATETIME DEFAULT NOW
+    (),
+    updatedAT DATETIME DEFAULT NOW
+    (),
     deletedAT DATETIME,
-PRIMARY KEY (team_abbreviation)
+PRIMARY KEY
+    (id)
 );
 
-CREATE TABLE player (
-    player_id INT AUTO_INCREMENT,
-    first_name VARCHAR(255),
-    last_name VARCHAR(255),
-    position VARCHAR (2),
-    throws VARCHAR (1),
-    hits VARCHAR (1),
-    team_abbreviation VARCHAR(3),
-    createdAT DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updatedAT DATETIME DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+    CREATE TABLE games
+    (
+        id INT
+        AUTO_INCREMENT,
+    homeTeamId INT NOT NULL ,
+    awayTeamId INT NOT NULL,
+    homeScore INT,
+    awayScore INT,
+    startTime TIMESTAMP NOT NULL,
+    createdAT DATETIME DEFAULT NOW
+        (),
+    updatedAT DATETIME DEFAULT NOW
+        (),  
     deletedAT DATETIME,
-PRIMARY KEY (player_id),
-FOREIGN KEY (team_abbreviation) REFERENCES team (team_abbreviation)
+PRIMARY KEY
+        (id),
+FOREIGN KEY
+        (homeTeamId) REFERENCES teams
+        (id),
+FOREIGN KEY
+        (awayTeamId) REFERENCES teams
+        (id)
 );
 
-CREATE TABLE game (
-    game_id INT AUTO_INCREMENT,
-    home_team_abbreviation VARCHAR(3),
-    away_team_abbreviation VARCHAR(3),
-    startedAT DATETIME,
-    home_team_abbreviation_score INT,
-    away_team_abbreviation_score INT,
-    createdAT DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updatedAT DATETIME DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
+        CREATE TABLE players
+        (
+            id INT
+            AUTO_INCREMENT,
+    firstName VARCHAR
+            (255),
+    lastName VARCHAR
+            (255),
+    position ENUM
+            ('SP', 'RP','C','1B','2B','3B','SS','CF','LF','RF','DH'),
+    throws ENUM
+            ('R','L','B'),
+    hits ENUM
+            ('R','L','B'),
+    currentTeamID INT NOT NULL,
+    createdAT DATETIME DEFAULT NOW
+            (),
+    updatedAT DATETIME DEFAULT NOW
+            (),
     deletedAT DATETIME,
-PRIMARY KEY (game_id),
-FOREIGN KEY (home_team_abbreviation) REFERENCES team (team_abbreviation),
-FOREIGN KEY (away_team_abbreviation) REFERENCES team (team_abbreviation)
+PRIMARY KEY
+            (id),
+FOREIGN KEY
+            (currentTeamId) REFERENCES teams
+            (id)
 );
 
-CREATE TABLE hitter (
-    game_id INT,
-    player_id INT,
-    at_bats INT,
-    runs INT,
-    hits INT,
-    doubles INT,
-    triples INT,
-    homeruns INT,
-    runs_batted INT,
-    walks INT,
-    strikeouts INT,
-    steals INT,
-    wins VARCHAR(1),
-    createdAT DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updatedAT DATETIME DEFAULT CURRENT_TIMESTAMP  ON UPDATE CURRENT_TIMESTAMP,
-    deletedAT DATETIME,
-PRIMARY KEY (player_id, game_id),
-FOREIGN KEY (player_id) REFERENCES player (player_id),
-FOREIGN KEY (game_id) REFERENCES game (game_id)
-);
+            CREATE TABLE hitterStats
+            (
+                playerId INT NOT NULL,
+                gameId INT NOT NULL,
+                teamId INT NOT NULL,
+                atBats INT DEFAULT 0,
+                runs INT DEFAULT 0,
+                hits INT DEFAULT 0,
+                doubles INT DEFAULT 0,
+                triples INT DEFAULT 0,
+                homeRuns INT DEFAULT 0,
+                runsBattedIn INT DEFAULT 0,
+                walks INT DEFAULT 0,
+                strikeOuts INT DEFAULT 0,
+                steals INT DEFAULT 0,
+                wins TINYINT DEFAULT 0,
+                createdAT DATETIME DEFAULT NOW(),
+                updatedAT DATETIME DEFAULT NOW(),
+                deletedAT DATETIME,
+                PRIMARY KEY (playerId, gameId),
+                FOREIGN KEY (playerId) REFERENCES players (id),
+                FOREIGN KEY (gameId) REFERENCES games (id),
+                FOREIGN KEY (teamId) REFERENCES teams (id)
+            );
 
-CREATE TABLE pitcher(
-    game_id INT,
-    player_id INT,
-    inningsPitched INT,
-    hits INT,
-    runs INT,
-    earnedruns INT,
-    walks INT,
-    strikeouts INT,
-    wins VARCHAR(1),
-    createdAT DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updatedAT DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deletedAT DATETIME,
-PRIMARY KEY (player_id, game_id),
-FOREIGN KEY (player_id) REFERENCES player (player_id),
-FOREIGN KEY (game_id) REFERENCES game (game_id)
-);
-
-);
+            CREATE TABLE pitcherStats
+            (
+                playerId INT NOT NULL,
+                gameId INT NOT NULL,
+                teamId INT NOT NULL,
+                wins TINYINT DEFAULT 0,
+                inningsPitched DECIMAL (3,1),
+                hits INT DEFAULT 0,
+                runs INT DEFAULT 0,
+                earnedRuns INT DEFAULT 0,
+                walks INT DEFAULT 0,
+                strikeouts INT DEFAULT 0,
+                createdAT DATETIME DEFAULT NOW(),
+                updatedAT DATETIME DEFAULT NOW() ,
+                deletedAT DATETIME,
+                PRIMARY KEY (playerId, gameId),
+                FOREIGN KEY (playerId) REFERENCES players (id),
+                FOREIGN KEY (gameId) REFERENCES games (id),
+                FOREIGN KEY (teamId) REFERENCES teams (id)
+            );
